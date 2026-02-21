@@ -194,6 +194,8 @@ class _ProductsPageState extends ConsumerState<ProductsPage> {
           child: FilledButton(
             style: FilledButton.styleFrom(
               backgroundColor: Colors.black,
+              padding: EdgeInsets.zero,
+              alignment: Alignment.center,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
