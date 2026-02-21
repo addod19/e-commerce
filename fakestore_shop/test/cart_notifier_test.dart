@@ -1,7 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:fakestore_shop/core/cache/cache_providers.dart';
 import 'package:fakestore_shop/features/cart/state/cart_notifier.dart';
 import 'package:fakestore_shop/features/products/domain/product.dart';
+import 'package:hive/hive.dart';
+import 'package:hive_test/hive_test.dart';
 
 Product _product(int id, {double price = 10, String? title}) {
   return Product(
@@ -63,7 +66,9 @@ void main() {
     test(
       'cartCountProvider and cartTotalProvider are correct with merged items',
       () {
-        final container = ProviderContainer();
+        final container = ProviderContainer(
+          overrides: [cartProvider.overrideWith((ref) => CartNotifier())],
+        );
         addTearDown(container.dispose);
 
         final notifier = container.read(cartProvider.notifier);
@@ -76,5 +81,41 @@ void main() {
         expect(container.read(cartTotalProvider), closeTo(22.5, 0.0001));
       },
     );
+  });
+
+  group('Cart persistence', () {
+    late Box box;
+
+    setUp(() async {
+      await setUpTestHive();
+      box = await Hive.openBox('cart_persistence_test_box');
+    });
+
+    tearDown(() async {
+      await box.close();
+      await tearDownTestHive();
+    });
+
+    test('restores persisted cart items after container restart', () async {
+      final firstContainer = ProviderContainer(
+        overrides: [cacheBoxProvider.overrideWithValue(box)],
+      );
+
+      final firstNotifier = firstContainer.read(cartProvider.notifier);
+      firstNotifier.add(_product(1, price: 5));
+      firstNotifier.add(_product(1, price: 5));
+      firstNotifier.add(_product(2, price: 12.5));
+      await firstNotifier.waitForPendingPersists();
+      firstContainer.dispose();
+
+      final secondContainer = ProviderContainer(
+        overrides: [cacheBoxProvider.overrideWithValue(box)],
+      );
+      addTearDown(secondContainer.dispose);
+
+      expect(secondContainer.read(cartCountProvider), 3);
+      expect(secondContainer.read(cartItemsProvider).length, 2);
+      expect(secondContainer.read(cartTotalProvider), closeTo(22.5, 0.0001));
+    });
   });
 }

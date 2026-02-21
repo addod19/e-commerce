@@ -15,11 +15,17 @@ class CategoriesPage extends ConsumerStatefulWidget {
 }
 
 class _CategoriesPageState extends ConsumerState<CategoriesPage> {
+  static const _pageSize = 10;
+
   String? selected;
+  int _pageIndex = 0;
   AsyncValue<List<Product>> productsAsync = const AsyncValue.data([]);
 
   Future<void> _loadCategory(String category) async {
-    setState(() => productsAsync = const AsyncValue.loading());
+    setState(() {
+      _pageIndex = 0;
+      productsAsync = const AsyncValue.loading();
+    });
     try {
       final repo = ref.read(productsRepositoryProvider);
       final products = await repo.getProductsByCategory(category);
@@ -29,6 +35,20 @@ class _CategoriesPageState extends ConsumerState<CategoriesPage> {
       if (!mounted) return;
       setState(() => productsAsync = AsyncValue.error(e, st));
     }
+  }
+
+  List<Product> _visibleProducts(List<Product> allProducts) {
+    final end = ((_pageIndex + 1) * _pageSize).clamp(0, allProducts.length);
+    return allProducts.sublist(0, end);
+  }
+
+  bool _hasMoreProducts(List<Product> allProducts) {
+    return (_pageIndex + 1) * _pageSize < allProducts.length;
+  }
+
+  void _loadMoreProducts(List<Product> allProducts) {
+    if (!_hasMoreProducts(allProducts)) return;
+    setState(() => _pageIndex += 1);
   }
 
   @override
@@ -86,29 +106,53 @@ class _CategoriesPageState extends ConsumerState<CategoriesPage> {
                     if (products.isEmpty) {
                       return const Center(child: Text('No products found'));
                     }
+                    final visibleProducts = _visibleProducts(products);
+                    final hasMore = _hasMoreProducts(products);
                     return ListView.builder(
                       padding: const EdgeInsets.all(12),
-                      itemCount: products.length,
-                      itemBuilder: (itemContext, i) => ProductCard(
-                        product: products[i],
-                        onTap: () => Navigator.of(itemContext).push(
-                          MaterialPageRoute(
-                            builder: (routeContext) =>
-                                ProductDetailPage(productId: products[i].id),
-                          ),
-                        ),
-                        onAddToCart: () {
-                          ref.read(cartProvider.notifier).add(products[i]);
-                          ScaffoldMessenger.of(itemContext)
-                            ..hideCurrentSnackBar()
-                            ..showSnackBar(
-                              const SnackBar(
-                                content: Text('Added to cart'),
-                                duration: Duration(seconds: 1),
+                      itemCount: visibleProducts.length + 1,
+                      itemBuilder: (itemContext, i) {
+                        if (i < visibleProducts.length) {
+                          final product = visibleProducts[i];
+                          return ProductCard(
+                            product: product,
+                            onTap: () => Navigator.of(itemContext).push(
+                              MaterialPageRoute(
+                                builder: (routeContext) =>
+                                    ProductDetailPage(productId: product.id),
                               ),
-                            );
-                        },
-                      ),
+                            ),
+                            onAddToCart: () {
+                              ref.read(cartProvider.notifier).add(product);
+                              ScaffoldMessenger.of(itemContext)
+                                ..hideCurrentSnackBar()
+                                ..showSnackBar(
+                                  const SnackBar(
+                                    content: Text('Added to cart'),
+                                    duration: Duration(seconds: 1),
+                                  ),
+                                );
+                            },
+                          );
+                        }
+
+                        if (!hasMore) {
+                          return const Padding(
+                            padding: EdgeInsets.all(16),
+                            child: Center(child: Text('No more products')),
+                          );
+                        }
+
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          child: Center(
+                            child: FilledButton(
+                              onPressed: () => _loadMoreProducts(products),
+                              child: const Text('Load more'),
+                            ),
+                          ),
+                        );
+                      },
                     );
                   },
                 ),

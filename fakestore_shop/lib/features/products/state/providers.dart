@@ -1,8 +1,8 @@
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hive/hive.dart';
 
+import '../../../core/cache/cache_providers.dart';
 import '../../../core/cache/local_cache.dart';
 import '../../../core/network/connectivity_service.dart';
 import '../../../core/network/dio_provider.dart';
@@ -18,11 +18,6 @@ final connectivityProvider = Provider<Connectivity>((ref) => Connectivity());
 
 final connectivityServiceProvider = Provider<ConnectivityService>((ref) {
   return ConnectivityService(ref.read(connectivityProvider));
-});
-
-final cacheBoxProvider = Provider<Box>((ref) {
-  // This is set up in main() after Hive init (see main.dart)
-  throw UnimplementedError('Override cacheBoxProvider in main()');
 });
 
 final localCacheProvider = Provider<LocalCache>((ref) {
