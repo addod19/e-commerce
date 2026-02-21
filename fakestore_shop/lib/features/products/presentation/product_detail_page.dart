@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../cart/state/cart_notifier.dart';
 import '../state/providers.dart';
 import 'products_error_presentation.dart';
 import 'widgets/error_view.dart';
@@ -12,9 +13,30 @@ class ProductDetailPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final async = ref.watch(productDetailProvider(productId));
+    final loadedProduct = async.valueOrNull?.product;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Product')),
+      appBar: AppBar(
+        title: const Text('Product'),
+        actions: [
+          if (loadedProduct != null)
+            IconButton(
+              tooltip: 'Add to cart',
+              icon: const Icon(Icons.add_shopping_cart_outlined),
+              onPressed: () {
+                ref.read(cartProvider.notifier).add(loadedProduct);
+                ScaffoldMessenger.of(context)
+                  ..hideCurrentSnackBar()
+                  ..showSnackBar(
+                    const SnackBar(
+                      content: Text('Added to cart'),
+                      duration: Duration(seconds: 1),
+                    ),
+                  );
+              },
+            ),
+        ],
+      ),
       body: async.when(
         loading: () =>
             const SlowAwareLoadingView(label: 'Loading product details...'),
