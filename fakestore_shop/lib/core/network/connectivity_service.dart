@@ -5,7 +5,7 @@ class ConnectivityService {
   ConnectivityService(this._connectivity);
 
   Future<bool> isOnline() async {
-    final result = await _connectivity.checkConnectivity();
-    return result != ConnectivityResult.none;
+    final results = await _connectivity.checkConnectivity();
+    return results.any((result) => result != ConnectivityResult.none);
   }
 }

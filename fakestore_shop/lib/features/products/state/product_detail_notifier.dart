@@ -7,23 +7,12 @@ class ProductDetailState {
   const ProductDetailState(this.product);
 }
 
-class ProductDetailNotifier extends AutoDisposeAsyncNotifier<ProductDetailState> {
-  late final int productId;
-
+class ProductDetailNotifier
+    extends AutoDisposeFamilyAsyncNotifier<ProductDetailState, int> {
   @override
-  Future<ProductDetailState> build() async {
-    throw UnimplementedError('Use the family provider');
-  }
-
-  Future<ProductDetailState> buildWithId(int id) async {
-    productId = id;
+  Future<ProductDetailState> build(int id) async {
     final repo = ref.read(productsRepositoryProvider);
     final product = await repo.getProduct(id);
     return ProductDetailState(product);
   }
-}
-
-// Riverpod family uses this hook:
-extension ProductDetailFamily on ProductDetailNotifier {
-  Future<ProductDetailState> build(int id) => buildWithId(id);
 }
