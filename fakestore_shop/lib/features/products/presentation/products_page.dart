@@ -8,11 +8,58 @@ import 'categories_page.dart';
 import 'widgets/error_view.dart';
 import 'widgets/product_card.dart';
 
-class ProductsPage extends ConsumerWidget {
+class ProductsPage extends ConsumerStatefulWidget {
   const ProductsPage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ProductsPage> createState() => _ProductsPageState();
+}
+
+class _ProductsPageState extends ConsumerState<ProductsPage> {
+  static const _loadMoreThreshold = 240.0;
+  final ScrollController _scrollController = ScrollController();
+  bool _loadTriggeredNearBottom = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (!_scrollController.hasClients) return;
+
+    final state = ref.read(productsNotifierProvider).valueOrNull;
+    if (state == null || !state.hasMore) return;
+
+    final shouldLoadMore =
+        _scrollController.position.extentAfter < _loadMoreThreshold;
+
+    if (shouldLoadMore && !_loadTriggeredNearBottom) {
+      _loadTriggeredNearBottom = true;
+      ref.read(productsNotifierProvider.notifier).loadMore();
+      return;
+    }
+
+    if (!shouldLoadMore && _loadTriggeredNearBottom) {
+      _loadTriggeredNearBottom = false;
+    }
+  }
+
+  Future<void> _refreshProducts() async {
+    _loadTriggeredNearBottom = false;
+    await ref.read(productsNotifierProvider.notifier).refresh();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final async = ref.watch(productsNotifierProvider);
     final cartCount = ref.watch(cartCountProvider);
 
@@ -35,8 +82,7 @@ class ProductsPage extends ConsumerWidget {
           ),
           IconButton(
             icon: const Icon(Icons.refresh),
-            onPressed: () =>
-                ref.read(productsNotifierProvider.notifier).refresh(),
+            onPressed: _refreshProducts,
           ),
         ],
       ),
@@ -46,15 +92,15 @@ class ProductsPage extends ConsumerWidget {
         error: (e, _) => ErrorView(
           title: 'Couldn’t load products',
           message: e.toString(),
-          onRetry: () => ref.read(productsNotifierProvider.notifier).refresh(),
+          onRetry: _refreshProducts,
         ),
         data: (state) {
           return RefreshIndicator(
-            onRefresh: () =>
-                ref.read(productsNotifierProvider.notifier).refresh(),
+            onRefresh: _refreshProducts,
             child: ListView.builder(
+              controller: _scrollController,
               padding: const EdgeInsets.all(12),
-              itemCount: state.visible.length + 1,
+              itemCount: state.visible.length + (state.hasMore ? 0 : 1),
               itemBuilder: (context, index) {
                 if (index < state.visible.length) {
                   final p = state.visible[index];
@@ -79,23 +125,9 @@ class ProductsPage extends ConsumerWidget {
                   );
                 }
 
-                if (!state.hasMore) {
-                  return const Padding(
-                    padding: EdgeInsets.all(16),
-                    child: Center(child: Text('No more products')),
-                  );
-                }
-
-                return Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  child: Center(
-                    child: FilledButton(
-                      onPressed: () => ref
-                          .read(productsNotifierProvider.notifier)
-                          .loadMore(),
-                      child: const Text('Load more'),
-                    ),
-                  ),
+                return const Padding(
+                  padding: EdgeInsets.all(16),
+                  child: Center(child: Text('No more products')),
                 );
               },
             ),

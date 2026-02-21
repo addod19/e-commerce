@@ -16,14 +16,50 @@ class CategoriesPage extends ConsumerStatefulWidget {
 
 class _CategoriesPageState extends ConsumerState<CategoriesPage> {
   static const _pageSize = 10;
+  static const _loadMoreThreshold = 240.0;
 
+  final ScrollController _scrollController = ScrollController();
   String? selected;
   int _pageIndex = 0;
+  bool _loadTriggeredNearBottom = false;
   AsyncValue<List<Product>> productsAsync = const AsyncValue.data([]);
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (!_scrollController.hasClients) return;
+    final products = productsAsync.valueOrNull;
+    if (products == null || !_hasMoreProducts(products)) return;
+
+    final shouldLoadMore =
+        _scrollController.position.extentAfter < _loadMoreThreshold;
+
+    if (shouldLoadMore && !_loadTriggeredNearBottom) {
+      _loadTriggeredNearBottom = true;
+      _loadMoreProducts(products);
+      return;
+    }
+
+    if (!shouldLoadMore && _loadTriggeredNearBottom) {
+      _loadTriggeredNearBottom = false;
+    }
+  }
 
   Future<void> _loadCategory(String category) async {
     setState(() {
       _pageIndex = 0;
+      _loadTriggeredNearBottom = false;
       productsAsync = const AsyncValue.loading();
     });
     try {
@@ -109,8 +145,9 @@ class _CategoriesPageState extends ConsumerState<CategoriesPage> {
                     final visibleProducts = _visibleProducts(products);
                     final hasMore = _hasMoreProducts(products);
                     return ListView.builder(
+                      controller: _scrollController,
                       padding: const EdgeInsets.all(12),
-                      itemCount: visibleProducts.length + 1,
+                      itemCount: visibleProducts.length + (hasMore ? 0 : 1),
                       itemBuilder: (itemContext, i) {
                         if (i < visibleProducts.length) {
                           final product = visibleProducts[i];
@@ -136,21 +173,9 @@ class _CategoriesPageState extends ConsumerState<CategoriesPage> {
                           );
                         }
 
-                        if (!hasMore) {
-                          return const Padding(
-                            padding: EdgeInsets.all(16),
-                            child: Center(child: Text('No more products')),
-                          );
-                        }
-
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                          child: Center(
-                            child: FilledButton(
-                              onPressed: () => _loadMoreProducts(products),
-                              child: const Text('Load more'),
-                            ),
-                          ),
+                        return const Padding(
+                          padding: EdgeInsets.all(16),
+                          child: Center(child: Text('No more products')),
                         );
                       },
                     );
