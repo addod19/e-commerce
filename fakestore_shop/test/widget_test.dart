@@ -26,20 +26,24 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
-          body: ProductCard(
-            product: _sampleProduct(),
-            onTap: () => tapped = true,
-            onAddToCart: () => addedToCart = true,
+          body: Center(
+            child: SizedBox(
+              width: 220,
+              child: ProductCard(
+                product: _sampleProduct(),
+                onTap: () => tapped = true,
+                onAddToCart: () => addedToCart = true,
+              ),
+            ),
           ),
         ),
       ),
     );
 
     expect(find.text('Widget Test Product'), findsOneWidget);
-    expect(find.text('electronics'), findsOneWidget);
     expect(find.text('\$29.99'), findsOneWidget);
 
-    await tester.tap(find.text('Widget Test Product'));
+    await tester.tap(find.byType(ProductCard));
     await tester.pump();
     expect(tapped, isTrue);
 

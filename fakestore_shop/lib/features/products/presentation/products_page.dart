@@ -74,14 +74,83 @@ class _ProductsPageState extends ConsumerState<ProductsPage> {
     if (_scrollController.hasClients) _scrollController.jumpTo(0);
   }
 
-  void _clearFilters() {
-    _loadTriggeredNearBottom = false;
-    _searchController.clear();
-    ref.read(productsNotifierProvider.notifier).clearFilters();
-    if (_scrollController.hasClients) _scrollController.jumpTo(0);
+  Future<void> _openCart() async {
+    await Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (_) => const CartPage()));
   }
 
-  Widget _buildFilters(ProductsState state) {
+  Widget _buildHeader(int cartCount) {
+    final theme = Theme.of(context);
+    return Row(
+      children: [
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Hi Shopper!',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: Colors.black.withValues(alpha: 0.7),
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              'Good Morning!',
+              style: theme.textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+          ],
+        ),
+        const Spacer(),
+        Stack(
+          clipBehavior: Clip.none,
+          children: [
+            Material(
+              color: Colors.white,
+              shape: const CircleBorder(),
+              child: InkWell(
+                customBorder: const CircleBorder(),
+                onTap: _openCart,
+                child: const Padding(
+                  padding: EdgeInsets.all(10),
+                  child: Icon(Icons.shopping_bag_outlined),
+                ),
+              ),
+            ),
+            if (cartCount > 0)
+              Positioned(
+                right: -6,
+                top: -6,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 5,
+                    vertical: 1,
+                  ),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFF6B00),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  constraints: const BoxConstraints(minWidth: 16),
+                  child: Text(
+                    cartCount > 99 ? '99+' : '$cartCount',
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 10,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSearchRow(ProductsState state) {
     if (_searchController.text != state.searchQuery) {
       _searchController.value = TextEditingValue(
         text: state.searchQuery,
@@ -89,65 +158,119 @@ class _ProductsPageState extends ConsumerState<ProductsPage> {
       );
     }
 
-    final hasActiveFilters =
-        state.selectedCategory != null || state.searchQuery.trim().isNotEmpty;
-
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          children: [
-            Row(
-              children: [
-                Expanded(
-                  child: DropdownButtonFormField<String?>(
-                    key: ValueKey(state.selectedCategory ?? '__all__'),
-                    initialValue: state.selectedCategory,
-                    decoration: const InputDecoration(labelText: 'Category'),
-                    items: [
-                      const DropdownMenuItem<String?>(
-                        value: null,
-                        child: Text('All categories'),
-                      ),
-                      ...state.categories.map(
-                        (category) => DropdownMenuItem<String?>(
-                          value: category,
-                          child: Text(category),
-                        ),
-                      ),
-                    ],
-                    onChanged: _onCategoryChanged,
-                  ),
-                ),
-                if (hasActiveFilters)
-                  IconButton(
-                    tooltip: 'Clear filters',
-                    onPressed: _clearFilters,
-                    icon: const Icon(Icons.filter_alt_off_outlined),
-                  ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: _searchController,
-              textInputAction: TextInputAction.search,
-              decoration: InputDecoration(
-                labelText: 'Search by name',
-                prefixIcon: const Icon(Icons.search),
-                suffixIcon: state.searchQuery.trim().isEmpty
-                    ? null
-                    : IconButton(
-                        tooltip: 'Clear search',
-                        onPressed: () => _onSearchChanged(''),
-                        icon: const Icon(Icons.clear),
-                      ),
+    return Row(
+      children: [
+        Expanded(
+          child: TextField(
+            controller: _searchController,
+            textInputAction: TextInputAction.search,
+            decoration: InputDecoration(
+              hintText: 'Search',
+              filled: true,
+              fillColor: Colors.white,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide.none,
               ),
-              onChanged: _onSearchChanged,
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 14,
+                vertical: 12,
+              ),
+              suffixIcon: state.searchQuery.trim().isEmpty
+                  ? null
+                  : IconButton(
+                      tooltip: 'Clear search',
+                      onPressed: () => _onSearchChanged(''),
+                      icon: const Icon(Icons.clear),
+                    ),
             ),
+            onChanged: _onSearchChanged,
+          ),
+        ),
+        const SizedBox(width: 10),
+        SizedBox(
+          height: 48,
+          width: 48,
+          child: FilledButton(
+            style: FilledButton.styleFrom(
+              backgroundColor: Colors.black,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            onPressed: () => _onSearchChanged(_searchController.text),
+            child: const Icon(Icons.search),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCategoryChips(ProductsState state) {
+    final chipLabels = ['All categories', ...state.categories];
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: [
+          for (var i = 0; i < chipLabels.length; i++) ...[
+            _CategoryChip(
+              label: i == 0 ? 'All' : chipLabels[i],
+              selected: i == 0
+                  ? state.selectedCategory == null
+                  : state.selectedCategory == chipLabels[i],
+              onTap: () => _onCategoryChanged(i == 0 ? null : chipLabels[i]),
+            ),
+            const SizedBox(width: 8),
           ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEmptyState(ProductsState state) {
+    final message = state.all.isEmpty
+        ? 'No products found'
+        : 'No products match your filters';
+    return SizedBox(
+      height: 260,
+      child: Center(
+        child: Text(
+          message,
+          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+            color: Colors.black.withValues(alpha: 0.6),
+            fontWeight: FontWeight.w600,
+          ),
         ),
       ),
+    );
+  }
+
+  Widget _buildBottomNav() {
+    return BottomNavigationBar(
+      currentIndex: 0,
+      type: BottomNavigationBarType.fixed,
+      selectedItemColor: const Color(0xFFFF8A1F),
+      unselectedItemColor: Colors.black.withValues(alpha: 0.35),
+      onTap: (index) {
+        if (index == 2) {
+          _openCart();
+        }
+      },
+      items: const [
+        BottomNavigationBarItem(icon: Icon(Icons.home_filled), label: 'Home'),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.storefront_outlined),
+          label: 'Shop',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.shopping_cart_outlined),
+          label: 'Cart',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.person_outline),
+          label: 'Profile',
+        ),
+      ],
     );
   }
 
@@ -157,22 +280,8 @@ class _ProductsPageState extends ConsumerState<ProductsPage> {
     final cartCount = ref.watch(cartCountProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('FakeStore Shop'),
-        actions: [
-          IconButton(
-            tooltip: 'Cart',
-            icon: _CartActionIcon(count: cartCount),
-            onPressed: () => Navigator.of(
-              context,
-            ).push(MaterialPageRoute(builder: (_) => const CartPage())),
-          ),
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: _refreshProducts,
-          ),
-        ],
-      ),
+      backgroundColor: const Color(0xFFF7F7F7),
+      bottomNavigationBar: _buildBottomNav(),
       body: async.when(
         loading: () => const SlowAwareLoadingView(label: 'Loading products...'),
         error: (e, _) {
@@ -186,68 +295,77 @@ class _ProductsPageState extends ConsumerState<ProductsPage> {
         },
         data: (state) {
           final hasNoResults = state.filtered.isEmpty;
-          final itemCount =
-              1 +
-              (hasNoResults
-                  ? 1
-                  : state.visible.length + (state.hasMore ? 0 : 1));
 
           return RefreshIndicator(
             onRefresh: _refreshProducts,
-            child: ListView.builder(
+            child: CustomScrollView(
               controller: _scrollController,
-              padding: const EdgeInsets.all(12),
-              itemCount: itemCount,
               physics: const AlwaysScrollableScrollPhysics(),
-              itemBuilder: (context, index) {
-                if (index == 0) {
-                  return _buildFilters(state);
-                }
-
-                if (hasNoResults) {
-                  if (state.all.isEmpty) {
-                    return const Padding(
-                      padding: EdgeInsets.all(16),
-                      child: Center(child: Text('No products found')),
-                    );
-                  }
-                  return const Padding(
-                    padding: EdgeInsets.all(16),
-                    child: Center(
-                      child: Text('No products match your filters'),
+              slivers: [
+                SliverPadding(
+                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 6),
+                  sliver: SliverToBoxAdapter(child: _buildHeader(cartCount)),
+                ),
+                SliverPadding(
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 6),
+                  sliver: SliverToBoxAdapter(child: _buildSearchRow(state)),
+                ),
+                SliverPadding(
+                  padding: const EdgeInsets.fromLTRB(16, 10, 16, 12),
+                  sliver: SliverToBoxAdapter(child: _buildCategoryChips(state)),
+                ),
+                if (hasNoResults)
+                  SliverToBoxAdapter(child: _buildEmptyState(state))
+                else
+                  SliverPadding(
+                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+                    sliver: SliverGrid(
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2,
+                            mainAxisSpacing: 14,
+                            crossAxisSpacing: 14,
+                            childAspectRatio: 0.62,
+                          ),
+                      delegate: SliverChildBuilderDelegate((context, index) {
+                        final p = state.visible[index];
+                        return ProductCard(
+                          product: p,
+                          onTap: () => Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (_) =>
+                                  ProductDetailPage(productId: p.id),
+                            ),
+                          ),
+                          onAddToCart: () {
+                            ref.read(cartProvider.notifier).add(p);
+                            ScaffoldMessenger.of(context)
+                              ..hideCurrentSnackBar()
+                              ..showSnackBar(
+                                const SnackBar(
+                                  content: Text('Added to cart'),
+                                  duration: Duration(seconds: 1),
+                                ),
+                              );
+                          },
+                        );
+                      }, childCount: state.visible.length),
                     ),
-                  );
-                }
-
-                final productIndex = index - 1;
-                if (productIndex < state.visible.length) {
-                  final p = state.visible[productIndex];
-                  return ProductCard(
-                    product: p,
-                    onTap: () => Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (_) => ProductDetailPage(productId: p.id),
+                  ),
+                if (!hasNoResults && !state.hasMore)
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
+                      child: Center(
+                        child: Text(
+                          'No more products',
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(color: Colors.black54),
+                        ),
                       ),
                     ),
-                    onAddToCart: () {
-                      ref.read(cartProvider.notifier).add(p);
-                      ScaffoldMessenger.of(context)
-                        ..hideCurrentSnackBar()
-                        ..showSnackBar(
-                          const SnackBar(
-                            content: Text('Added to cart'),
-                            duration: Duration(seconds: 1),
-                          ),
-                        );
-                    },
-                  );
-                }
-
-                return const Padding(
-                  padding: EdgeInsets.all(16),
-                  child: Center(child: Text('No more products')),
-                );
-              },
+                  ),
+              ],
             ),
           );
         },
@@ -256,39 +374,44 @@ class _ProductsPageState extends ConsumerState<ProductsPage> {
   }
 }
 
-class _CartActionIcon extends StatelessWidget {
-  const _CartActionIcon({required this.count});
+class _CategoryChip extends StatelessWidget {
+  const _CategoryChip({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
 
-  final int count;
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      clipBehavior: Clip.none,
-      children: [
-        const Icon(Icons.shopping_cart_outlined),
-        if (count > 0)
-          Positioned(
-            right: -7,
-            top: -7,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.error,
-                borderRadius: BorderRadius.circular(10),
-              ),
-              constraints: const BoxConstraints(minWidth: 16),
-              child: Text(
-                count > 99 ? '99+' : '$count',
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: Theme.of(context).colorScheme.onError,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
+    return Material(
+      color: selected ? Colors.black : Colors.transparent,
+      borderRadius: BorderRadius.circular(12),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(12),
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            border: selected
+                ? null
+                : Border.all(color: Colors.black.withValues(alpha: 0.15)),
+          ),
+          child: Text(
+            label,
+            style: TextStyle(
+              color: selected
+                  ? Colors.white
+                  : Colors.black.withValues(alpha: 0.45),
+              fontWeight: FontWeight.w600,
             ),
           ),
-      ],
+        ),
+      ),
     );
   }
 }

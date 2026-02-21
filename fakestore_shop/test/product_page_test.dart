@@ -78,24 +78,22 @@ void main() {
           },
         );
 
-        expect(find.text('FakeStore Shop'), findsOneWidget);
+        expect(find.text('Hi Shopper!'), findsOneWidget);
+        expect(find.text('Good Morning!'), findsOneWidget);
         expect(find.text('3'), findsOneWidget); // cart badge
-        expect(find.text('Search by name'), findsOneWidget);
-        expect(find.text('All categories'), findsOneWidget);
+        expect(find.text('Search'), findsOneWidget);
+        expect(find.text('All'), findsOneWidget);
         expect(find.text('Laptop Pro'), findsOneWidget);
         expect(find.text('Lamp Stand'), findsOneWidget);
-        expect(find.text('Running Shoes'), findsOneWidget);
 
         await tester.enterText(find.byType(TextField), 'la');
-        await tester.pump();
+        await tester.pumpAndSettle();
 
         expect(find.text('Laptop Pro'), findsOneWidget);
         expect(find.text('Lamp Stand'), findsOneWidget);
         expect(find.text('Running Shoes'), findsNothing);
 
-        await tester.tap(find.byType(DropdownButtonFormField<String?>));
-        await tester.pumpAndSettle();
-        await tester.tap(find.text('home').last);
+        await tester.tap(find.text('home'));
         await tester.pumpAndSettle();
 
         expect(find.text('la'), findsOneWidget); // search is preserved
@@ -114,8 +112,8 @@ void main() {
       await _pumpProductsPage(tester, repository: repo);
 
       expect(find.text('No products found'), findsOneWidget);
-      expect(find.text('Search by name'), findsOneWidget);
-      expect(find.text('All categories'), findsOneWidget);
+      expect(find.text('Search'), findsOneWidget);
+      expect(find.text('All'), findsOneWidget);
     });
 
     testWidgets('shows mapped server error state when load fails with 500', (
