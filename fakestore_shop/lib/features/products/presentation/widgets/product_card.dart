@@ -27,8 +27,13 @@ class ProductCard extends StatelessWidget {
               child: Image.network(
                 product.image,
                 fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) =>
-                    const Center(child: Icon(Icons.broken_image)),
+                errorBuilder: (context, error, stackTrace) => Container(
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
+                  alignment: Alignment.center,
+                  child: const Icon(Icons.broken_image_outlined),
+                ),
                 loadingBuilder: (context, child, progress) {
                   if (progress == null) return child;
                   return const Center(

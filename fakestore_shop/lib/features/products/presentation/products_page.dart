@@ -4,9 +4,11 @@ import '../../cart/presentation/cart_page.dart';
 import '../../cart/state/cart_notifier.dart';
 import '../state/providers.dart';
 import '../state/products_notifier.dart';
+import 'products_error_presentation.dart';
 import 'product_detail_page.dart';
 import 'widgets/error_view.dart';
 import 'widgets/product_card.dart';
+import 'widgets/slow_aware_loading_view.dart';
 
 class ProductsPage extends ConsumerStatefulWidget {
   const ProductsPage({super.key});
@@ -172,13 +174,16 @@ class _ProductsPageState extends ConsumerState<ProductsPage> {
         ],
       ),
       body: async.when(
-        loading: () =>
-            const Center(child: CircularProgressIndicator.adaptive()),
-        error: (e, _) => ErrorView(
-          title: 'Couldn’t load products',
-          message: e.toString(),
-          onRetry: _refreshProducts,
-        ),
+        loading: () => const SlowAwareLoadingView(label: 'Loading products...'),
+        error: (e, _) {
+          final details = presentProductsError(e);
+          return ErrorView(
+            title: details.title,
+            message: details.message,
+            icon: details.icon,
+            onRetry: _refreshProducts,
+          );
+        },
         data: (state) {
           final hasNoResults = state.filtered.isEmpty;
           final itemCount =

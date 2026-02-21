@@ -41,7 +41,17 @@ class CartPage extends ConsumerWidget {
                               item.product.image,
                               fit: BoxFit.contain,
                               errorBuilder: (context, error, stackTrace) =>
-                                  const Icon(Icons.broken_image),
+                                  Container(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .surfaceContainerHighest
+                                        .withValues(alpha: 0.4),
+                                    alignment: Alignment.center,
+                                    child: const Icon(
+                                      Icons.broken_image_outlined,
+                                      size: 20,
+                                    ),
+                                  ),
                             ),
                           ),
                           title: Text(
