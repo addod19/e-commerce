@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../cart/state/cart_notifier.dart';
 import '../state/providers.dart';
 import '../domain/product.dart';
-import '../data/products_repository.dart';
 import 'product_detail_page.dart';
 import 'widgets/error_view.dart';
 import 'widgets/product_card.dart';
@@ -23,8 +23,10 @@ class _CategoriesPageState extends ConsumerState<CategoriesPage> {
     try {
       final repo = ref.read(productsRepositoryProvider);
       final products = await repo.getProductsByCategory(category);
+      if (!mounted) return;
       setState(() => productsAsync = AsyncValue.data(products));
     } catch (e, st) {
+      if (!mounted) return;
       setState(() => productsAsync = AsyncValue.error(e, st));
     }
   }
@@ -36,7 +38,8 @@ class _CategoriesPageState extends ConsumerState<CategoriesPage> {
     return Scaffold(
       appBar: AppBar(title: const Text('Categories')),
       body: categories.when(
-        loading: () => const Center(child: CircularProgressIndicator.adaptive()),
+        loading: () =>
+            const Center(child: CircularProgressIndicator.adaptive()),
         error: (e, _) => ErrorView(
           title: 'Couldn’t load categories',
           message: e.toString(),
@@ -48,8 +51,10 @@ class _CategoriesPageState extends ConsumerState<CategoriesPage> {
               Padding(
                 padding: const EdgeInsets.all(12),
                 child: DropdownButtonFormField<String>(
-                  value: selected,
-                  decoration: const InputDecoration(labelText: 'Select category'),
+                  initialValue: selected,
+                  decoration: const InputDecoration(
+                    labelText: 'Select category',
+                  ),
                   items: state.categories
                       .map((c) => DropdownMenuItem(value: c, child: Text(c)))
                       .toList(),
@@ -62,7 +67,8 @@ class _CategoriesPageState extends ConsumerState<CategoriesPage> {
               ),
               Expanded(
                 child: productsAsync.when(
-                  loading: () => const Center(child: CircularProgressIndicator.adaptive()),
+                  loading: () =>
+                      const Center(child: CircularProgressIndicator.adaptive()),
                   error: (e, _) => ErrorView(
                     title: 'Couldn’t load category products',
                     message: e.toString(),
@@ -73,7 +79,9 @@ class _CategoriesPageState extends ConsumerState<CategoriesPage> {
                   ),
                   data: (products) {
                     if (selected == null) {
-                      return const Center(child: Text('Pick a category to view products'));
+                      return const Center(
+                        child: Text('Pick a category to view products'),
+                      );
                     }
                     if (products.isEmpty) {
                       return const Center(child: Text('No products found'));
@@ -81,13 +89,25 @@ class _CategoriesPageState extends ConsumerState<CategoriesPage> {
                     return ListView.builder(
                       padding: const EdgeInsets.all(12),
                       itemCount: products.length,
-                      itemBuilder: (_, i) => ProductCard(
+                      itemBuilder: (itemContext, i) => ProductCard(
                         product: products[i],
-                        onTap: () => Navigator.of(context).push(
+                        onTap: () => Navigator.of(itemContext).push(
                           MaterialPageRoute(
-                            builder: (_) => ProductDetailPage(productId: products[i].id),
+                            builder: (routeContext) =>
+                                ProductDetailPage(productId: products[i].id),
                           ),
                         ),
+                        onAddToCart: () {
+                          ref.read(cartProvider.notifier).add(products[i]);
+                          ScaffoldMessenger.of(itemContext)
+                            ..hideCurrentSnackBar()
+                            ..showSnackBar(
+                              const SnackBar(
+                                content: Text('Added to cart'),
+                                duration: Duration(seconds: 1),
+                              ),
+                            );
+                        },
                       ),
                     );
                   },

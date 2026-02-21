@@ -4,8 +4,14 @@ import '../../domain/product.dart';
 class ProductCard extends StatelessWidget {
   final Product product;
   final VoidCallback onTap;
+  final VoidCallback onAddToCart;
 
-  const ProductCard({super.key, required this.product, required this.onTap});
+  const ProductCard({
+    super.key,
+    required this.product,
+    required this.onTap,
+    required this.onAddToCart,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -48,9 +54,20 @@ class ProductCard extends StatelessWidget {
                       style: Theme.of(context).textTheme.labelMedium,
                     ),
                     const SizedBox(height: 8),
-                    Text(
-                      '\$${product.price.toStringAsFixed(2)}',
-                      style: Theme.of(context).textTheme.titleMedium,
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            '\$${product.price.toStringAsFixed(2)}',
+                            style: Theme.of(context).textTheme.titleMedium,
+                          ),
+                        ),
+                        IconButton(
+                          tooltip: 'Add to cart',
+                          onPressed: onAddToCart,
+                          icon: const Icon(Icons.add_shopping_cart_outlined),
+                        ),
+                      ],
                     ),
                   ],
                 ),
