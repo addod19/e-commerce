@@ -15,15 +15,19 @@ class ProductCard extends StatelessWidget {
         onTap: onTap,
         child: Row(
           children: [
-            AspectRatio(
-              aspectRatio: 1,
+            SizedBox(
+              width: 110,
+              height: 110,
               child: Image.network(
                 product.image,
                 fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => const Center(child: Icon(Icons.broken_image)),
+                errorBuilder: (context, error, stackTrace) =>
+                    const Center(child: Icon(Icons.broken_image)),
                 loadingBuilder: (context, child, progress) {
                   if (progress == null) return child;
-                  return const Center(child: CircularProgressIndicator.adaptive());
+                  return const Center(
+                    child: CircularProgressIndicator.adaptive(),
+                  );
                 },
               ),
             ),
@@ -33,12 +37,21 @@ class ProductCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(product.title, maxLines: 2, overflow: TextOverflow.ellipsis),
+                    Text(
+                      product.title,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                     const SizedBox(height: 8),
-                    Text(product.category, style: Theme.of(context).textTheme.labelMedium),
+                    Text(
+                      product.category,
+                      style: Theme.of(context).textTheme.labelMedium,
+                    ),
                     const SizedBox(height: 8),
-                    Text('\$${product.price.toStringAsFixed(2)}',
-                        style: Theme.of(context).textTheme.titleMedium),
+                    Text(
+                      '\$${product.price.toStringAsFixed(2)}',
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
                   ],
                 ),
               ),
