@@ -198,10 +198,19 @@ flutter analyze
 
 You can deploy this project using:
 
-```sh
-  Not yet deployed
-```
+Deploy Flutter Web(Fastest)
 
+```sh
+  flutter build web --release
+  flutter build appbundle --release --> for playstore
+```
+Deploy Flutter Web
+```sh
+  npm i -g firebase-tools
+  firebase experiments:enable webframeworks
+  firebase init hosting
+  firebase deploy
+```
 ## Screenshots
 
 <img src="fake.png" alt="logo" width="140"  height="auto" />
