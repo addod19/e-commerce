@@ -119,7 +119,7 @@ test/
 
 > Add a link to your deployed project.
 
-- [Live Demo Link](https://google.com)
+- Not yet deployed, watch out soon!!!
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -187,6 +187,7 @@ To run tests, run the following command:
 ```sh
   flutter test
 ```
+<img src="fake2.png" alt="logo" width="140"  height="auto" />
 
 To run static analysis
 ```bash
@@ -202,8 +203,8 @@ You can deploy this project using:
 
 ## Screenshots
 
- <img src="fake.png" alt="logo" width="140"  height="auto" />
-  <img src="fake1.png" alt="logo" width="140"  height="auto" />
+<img src="fake.png" alt="logo" width="140"  height="auto" />
+<img src="fake1.png" alt="logo" width="140"  height="auto" />
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -215,9 +216,9 @@ You can deploy this project using:
 
 👤 **Daniel Larbi Addo**
 
-- GitHub: [@githubhandle](https://github.com/addod19)
-- Twitter: [@twitterhandle]([https://twitter.com/daniellarbiaddo](https://x.com/DanielLarbiAdd1))
-- LinkedIn: [LinkedIn](https://linkedin.com/in/daniel-larbi-addo)
+- GitHub: [@addod19](https://github.com/addod19)
+- Twitter: [@DanielLArbiAdd1]([https://twitter.com/daniellarbiaddo](https://x.com/DanielLarbiAdd1))
+- LinkedIn: [Daniel Larbi Addo](https://linkedin.com/in/daniel-larbi-addo)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
