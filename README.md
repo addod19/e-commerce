@@ -6,7 +6,7 @@
   - [🛠 Built With](#built-with)
     - [Tech Stack](#tech-stack)
     - [Key Features](#key-features)
-  - [🚀 Live Demo](#live-demo)
+  - [🚀 Project Demo](#project-demo)
 - [💻 Getting Started](#getting-started)
   - [Prerequisites](#prerequisites)
   - [Setup](#setup)
@@ -115,8 +115,9 @@ test/
 
 <!-- LIVE DEMO -->
 
-## 🚀 Live Demo <a name="live-demo"></a>
-
+## 🚀Project Demo <a name="project-demo"></a>
+ [fake3.webm](https://github.com/user-attachments/assets/d16e3ccf-0586-497d-b823-4968a24ac371)
+ 
 > Add a link to your deployed project.
 
 - Not yet deployed, watch out soon!!!
