@@ -1,17 +1,5 @@
 <a name="readme-top"></a>
 
-
-<div align="center">
-  <!-- You are encouraged to replace this logo with your own! Otherwise you can also remove it. -->
-  <img src="murple_logo.png" alt="logo" width="140"  height="auto" />
-  <br/>
-
-  <h3><b>Teczaleel Fakeshop E-commerce Docummentation</b></h3>
-
-</div>
-
-<!-- TABLE OF CONTENTS -->
-
 # 📗 Table of Contents
 
 - [📖 About the Project](#about-project)
@@ -37,6 +25,7 @@
 - [❓ FAQ (OPTIONAL)](#faq)
 - [📝 License](#license)
 
+
 <!-- PROJECT DESCRIPTION -->
 
 # 📖 FakeStore Shop
@@ -46,7 +35,6 @@
 ## About the Project
 FakeStore Shop is a mobile shopping app powered by the FakeStore API.  
 It focuses on clean state management, resilient data loading, cache safety, and a polished user experience.
-
 
 ## 🛠 Built With <a name="built-with"></a>
 
@@ -59,6 +47,7 @@ It focuses on clean state management, resilient data loading, cache safety, and 
 - [ ] Equatable
 - [ ] Flutter Test
 - [ ] Mocktail
+
 
 ### Key Features <a name="key-features"></a>
 
@@ -78,16 +67,11 @@ It focuses on clean state management, resilient data loading, cache safety, and 
   - image loading failures
 - Widget, state, and repository test coverage
 
-
-
 > Describe between 1-3 key features of the application.
 
-- **Offline-first browsing (cache-first + stale-while-revalidate)
-The app loads products from a local Hive cache first so screens open instantly and still work without internet. When the device is online and cached data is stale, it refreshes silently in the background to keep data up to date.**
-- **Client-side pagination (“Load more”)
-Products are fetched once (from cache or network) and then paginated locally into pages (e.g., 10 items per page). This keeps scrolling fast and avoids extra API calls just to see more items.**
-- **Smart networking to prevent unnecessary calls
-Requests are de-duplicated (multiple widgets asking for the same data triggers only one network call) and controlled with TTL freshness checks. This reduces bandwidth usage, improves performance, and makes the app more stable under poor networks.**
+- **Offline-first browsing (cache-first + stale-while-revalidate) The app loads products from a local Hive cache first so screens open instantly and still work without internet. When the device is online and cached data is stale, it refreshes silently in the background to keep data up to date.**
+- **Client-side pagination (“Load more”) Products are fetched once (from cache or network) and then paginated locally into pages (e.g., 10 items per page). This keeps scrolling fast and avoids extra API calls just to see more items.**
+- **Smart networking to prevent unnecessary calls Requests are de-duplicated (multiple widgets asking for the same data triggers only one network call) and controlled with TTL freshness checks. This reduces bandwidth usage, improves performance, and makes the app more stable under poor networks.**
 
 
 ## Architecture
@@ -102,7 +86,6 @@ Patterns used:
 - Repository pattern
 - Dependency injection via Riverpod providers
 - Separation of concerns across data/domain/presentation
-
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -129,9 +112,16 @@ test/
   widget_test.dart
 ```
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-<!-- GETTING STARTED -->
+<!-- LIVE DEMO -->
+
+## 🚀 Live Demo <a name="live-demo"></a>
+
+> Add a link to your deployed project.
+
+- [Live Demo Link](https://google.com)
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ## 💻 Getting Started <a name="getting-started"></a>
 
@@ -210,6 +200,10 @@ You can deploy this project using:
   Not yet deployed
 ```
 
+## Screenshots
+
+ <img src="fake.png" alt="logo" width="140"  height="auto" />
+  <img src="fake1.png" alt="logo" width="140"  height="auto" />
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -291,4 +285,4 @@ This project is [MIT](./LICENSE) licensed.
 
 _NOTE: we recommend using the [MIT license](https://choosealicense.com/licenses/mit/) - you can set it up quickly by [using templates available on GitHub](https://docs.github.com/en/communities/setting-up-your-project-for-healthy-contributions/adding-a-license-to-a-repository). You can also use [any other license](https://choosealicense.com/licenses/) if you wish._
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+<p align="r
